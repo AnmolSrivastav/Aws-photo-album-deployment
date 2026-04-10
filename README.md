@@ -18,7 +18,7 @@ Think of it like this:
 
 Architecture Overview
 
-
+```
 Internet
    │
    ▼
@@ -34,12 +34,13 @@ VPC: ASrivastavaVPC (10.0.0.0/16) — Region: us-east-1
    └── Availability Zone B (us-east-1b)
          ├── Public Subnet 2  (10.0.3.0/24)  ← WebServerInstance (EC2)
          └── Private Subnet 2 (10.0.4.0/24)  ← RDS MySQL Database
-
+```
 
 ---
 
 AWS Services Used
 
+```
 | Service | Purpose |
 |--------|---------|
 | VPC | Creates an isolated private network for all resources |
@@ -51,7 +52,7 @@ AWS Services Used
 | Elastic IP | Static public IP address for the web server |
 | Network ACLs | Subnet-level firewall rules |
 | Security Groups | Instance-level firewall rules |
-
+```
 ---
 
 Step-by-Step Setup Guide
@@ -68,7 +69,7 @@ Step 1 — Set Up the VPC and Subnets
 4. Create an Internet Gateway, name it `ASrivastavaIGW`, and attach it to the VPC
 5. Create a Public Route Table, add a route `0.0.0.0/0 → IGW`, and associate it with both public subnets
 
-> 💡 Why two availability zones? If one data center goes down, the other keeps your app running. This is called high availability.
+> Why two availability zones? If one data center goes down, the other keeps your app running. This is called high availability.
 
 ---
 
@@ -88,18 +89,18 @@ Step 2 — Launch the EC2 Web Server
 Once the instance is running, SSH into it and install the required software:
 
 ```bash
- Update the system
+Update the system
 sudo dnf update -y
 
- Install Apache web server
+Install Apache web server
 sudo dnf install httpd -y
 sudo systemctl start httpd
 sudo systemctl enable httpd
 
- Install PHP
+Install PHP
 sudo dnf install php php-mysqlnd -y
 
- Install phpMyAdmin
+Install phpMyAdmin
 sudo dnf install phpMyAdmin -y
 ```
 
@@ -119,7 +120,7 @@ ping 10.0.2.65
 ssh -i Assignment-1b.ppk ec2-user@10.0.2.65
 ```
 
-> 💡 This simulates how backend/internal servers behave in real company architectures — they never talk directly to the internet.
+> This simulates how backend/internal servers behave in real company architectures — they never talk directly to the internet.
 
 ---
 
@@ -133,7 +134,7 @@ Step 4 — Set Up the RDS MySQL Database
 6. Attach Security Group `RDSSG` that only allows:
    - Port `3306` (MySQL) from `WebServerSG` only
 
-> 💡 By setting public access to No, your database is invisible to the internet. Only your web server can talk to it. This is a standard security best practice used in every real-world application.
+> By setting public access to No, your database is invisible to the internet. Only your web server can talk to it. This is a standard security best practice used in every real-world application.
 
 ---
 
@@ -271,7 +272,7 @@ This project follows a defence-in-depth approach — multiple layers of security
 
 ---
 
- 📁 Project Structure
+Project Structure
 
 ```
 photo-album-aws/
