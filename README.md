@@ -308,11 +308,13 @@ I followed a defence-in-depth approach — multiple layers of security:
 Project Structure
 
 ```
-photo-album-aws/
+photo-album/
 │
 ├── constants.php           DB and S3 connection settings
 ├── album.php               Main webpage displaying photos
-├── /phpMyAdmin             Installed on EC2 for DB management
+├── defaultstyle.css         
+├── mydb.php
+├── photo.php
 │
 └── AWS Infrastructure
     ├── VPC (ASrivastavaVPC)
