@@ -1,17 +1,17 @@
 AWS-Based Photo Album Application
 
-A fully functional, secure, and scalable photo album web application built and deployed entirely on Amazon Web Services (AWS). This project demonstrates real-world cloud infrastructure setup using core AWS services — VPC, EC2, RDS, S3, and phpMyAdmin.
+I built a fully functional, secure, and scalable photo album web application and deployed it entirely on Amazon Web Services (AWS). This project demonstrates my real-world cloud infrastructure setup using core AWS services — VPC, EC2, RDS, S3, and phpMyAdmin.
 
 ---
 
 What This Project Does
 
-This application lets users view a photo album through a web browser. Photos are stored in AWS S3 (cloud storage), and information about each photo (like title, description, and keywords) is stored in a MySQL database hosted on AWS RDS. The website itself runs on an Apache web server inside an EC2 virtual machine, all wrapped inside a secure private network (VPC).
+I built this application to let users view a photo album through a web browser. I stored the photos in AWS S3 (cloud storage), and saved information about each photo (like title, description, and keywords) in a MySQL database hosted on AWS RDS. The website runs on an Apache web server inside an EC2 virtual machine, all wrapped inside a secure private network (VPC) that I configured.
 
-Think of it like this:
-- S3  = your photo storage drive in the cloud
-- RDS = your database that remembers photo details
-- EC2 = the computer running your website
+Here is how I mapped each service:
+- S3  = my photo storage drive in the cloud
+- RDS = my database that remembers photo details
+- EC2 = the computer running my website
 - VPC = the secure private network connecting everything
 
 ---
@@ -53,54 +53,55 @@ AWS Services Used
 | Network ACLs | Subnet-level firewall rules |
 | Security Groups | Instance-level firewall rules |
 ```
+
 ---
 
 Step-by-Step Setup Guide
 
 Step 1 — Set Up the VPC and Subnets
 
-1. Go to AWS Console → VPC → Create VPC
-2. Name it `ASrivastavaVPC`, set CIDR block to `10.0.0.0/16`
-3. Create 4 subnets across 2 Availability Zones:
+1. I went to AWS Console → VPC → Create VPC
+2. I named it `ASrivastavaVPC` and set the CIDR block to `10.0.0.0/16`
+3. I created 4 subnets across 2 Availability Zones:
    - `Public Subnet 1` → `10.0.1.0/24` (us-east-1a)
    - `Private Subnet 1` → `10.0.2.0/24` (us-east-1a)
    - `Public Subnet 2` → `10.0.3.0/24` (us-east-1b)
    - `Private Subnet 2` → `10.0.4.0/24` (us-east-1b)
-4. Create an Internet Gateway, name it `ASrivastavaIGW`, and attach it to the VPC
-5. Create a Public Route Table, add a route `0.0.0.0/0 → IGW`, and associate it with both public subnets
+4. I created an Internet Gateway, named it `ASrivastavaIGW`, and attached it to the VPC
+5. I created a Public Route Table, added a route `0.0.0.0/0 → IGW`, and associated it with both public subnets
 
-> Why two availability zones? If one data center goes down, the other keeps your app running. This is called high availability.
+> Why two availability zones? If one data center goes down, the other keeps the app running. This is called high availability.
 
 ---
 
 Step 2 — Launch the EC2 Web Server
 
-1. Go to EC2 → Launch Instance
-2. Name it `WebServerInstance`
-3. Choose Amazon Linux 2023 AMI and instance type t2.micro (Free Tier eligible)
-4. Place it in Public Subnet 2 so it gets a public IP
-5. Attach or create a key pair (e.g., `Assignment-1b.ppk`) for SSH access
-6. Assign a Security Group (`WebServerSG`) allowing:
+1. I went to EC2 → Launch Instance
+2. I named it `WebServerInstance`
+3. I chose Amazon Linux 2023 AMI and instance type t2.micro (Free Tier eligible)
+4. I placed it in Public Subnet 2 so it gets a public IP
+5. I attached a key pair (e.g., `Assignment-1b.ppk`) for SSH access
+6. I assigned a Security Group (`WebServerSG`) allowing:
    - Port `22` (SSH) for admin access
    - Port `80` (HTTP) for web traffic
    - Port `443` (HTTPS) for secure web traffic
-7. After launch, allocate an Elastic IP and associate it with this instance — this gives you a permanent public IP
+7. After launch, I allocated an Elastic IP and associated it with this instance — this gives a permanent public IP
 
-Once the instance is running, SSH into it and install the required software:
+Once the instance was running, I SSH'd into it and installed the required software:
 
 ```bash
-Update the system
+# Update the system
 sudo dnf update -y
 
-Install Apache web server
+# Install Apache web server
 sudo dnf install httpd -y
 sudo systemctl start httpd
 sudo systemctl enable httpd
 
-Install PHP
+# Install PHP
 sudo dnf install php php-mysqlnd -y
 
-Install phpMyAdmin
+# Install phpMyAdmin
 sudo dnf install phpMyAdmin -y
 ```
 
@@ -108,15 +109,15 @@ sudo dnf install phpMyAdmin -y
 
 Step 3 — Launch the Test Instance (Optional but Recommended)
 
-1. Launch a second EC2 instance named `TestInstance`
-2. Place it in Private Subnet 1 (no internet access — this is intentional)
-3. Use it to test internal network connectivity:
+1. I launched a second EC2 instance named `TestInstance`
+2. I placed it in Private Subnet 1 (no internet access — this is intentional)
+3. I used it to test internal network connectivity:
 
 ```bash
- Ping the web server's private IP from the test instance
+# Ping the web server's private IP from the test instance
 ping 10.0.2.65
 
- Test SSH connectivity internally
+# Test SSH connectivity internally
 ssh -i Assignment-1b.ppk ec2-user@10.0.2.65
 ```
 
@@ -126,46 +127,46 @@ ssh -i Assignment-1b.ppk ec2-user@10.0.2.65
 
 Step 4 — Set Up the RDS MySQL Database
 
-1. Go to RDS → Create Database
-2. Choose MySQL, version `8.0.39`
-3. Select Free Tier template
-4. Set Public access = No — this is critical for security
-5. Create a DB Subnet Group (`asrivastavadbsubnetgroup`) using Private Subnet 1 and Private Subnet 2
-6. Attach Security Group `RDSSG` that only allows:
+1. I went to RDS → Create Database
+2. I chose MySQL, version `8.0.39`
+3. I selected the Free Tier template
+4. I set Public access = No — this is critical for security
+5. I created a DB Subnet Group (`asrivastavadbsubnetgroup`) using Private Subnet 1 and Private Subnet 2
+6. I attached Security Group `RDSSG` that only allows:
    - Port `3306` (MySQL) from `WebServerSG` only
 
-> By setting public access to No, your database is invisible to the internet. Only your web server can talk to it. This is a standard security best practice used in every real-world application.
+> By setting public access to No, my database is invisible to the internet. Only my web server can talk to it. This is a standard security best practice used in every real-world application.
 
 ---
 
 Step 5 — Configure phpMyAdmin
 
-phpMyAdmin gives you a visual interface to manage your database without writing SQL manually.
+phpMyAdmin gives a visual interface to manage the database without writing SQL manually.
 
-1. Edit the phpMyAdmin config file to point to your RDS endpoint:
+1. I edited the phpMyAdmin config file to point to my RDS endpoint:
 
 ```bash
 sudo nano /etc/phpMyAdmin/config.inc.php
 ```
 
-2. Set the host to your RDS endpoint URL (found in the RDS console under Connectivity & security)
-3. If you get a permissions error, fix it with:
+2. I set the host to my RDS endpoint URL (found in the RDS console under Connectivity & security)
+3. I ran into a permissions error and fixed it with:
 
 ```bash
 sudo chown -R apache:apache /usr/share/phpMyAdmin
 sudo chmod -R 755 /usr/share/phpMyAdmin
 ```
 
-4. Access phpMyAdmin via browser: `http://<your-elastic-ip>/phpMyAdmin`
+4. I accessed phpMyAdmin via browser: `http://<my-elastic-ip>/phpMyAdmin`
 
 ---
 
 Step 6 — Create the S3 Bucket for Photos
 
-1. Go to S3 → Create Bucket
-2. Name it `photoalbum-images-bucket`
-3. Uncheck "Block all public access" (needed so browsers can load the photos)
-4. Apply this bucket policy to allow public read access:
+1. I went to S3 → Create Bucket
+2. I named it `photoalbum-images-bucket`
+3. I unchecked "Block all public access" (needed so browsers can load the photos)
+4. I applied this bucket policy to allow public read access:
 
 ```json
 {
@@ -182,15 +183,15 @@ Step 6 — Create the S3 Bucket for Photos
 }
 ```
 
-5. Upload your image files (`.jpg`, `.png`, etc.) into the bucket
-6. Each image will get a public URL like:
+5. I uploaded my image files (`.jpg`, `.png`, etc.) into the bucket
+6. Each image got a public URL like:
    `https://photoalbum-images-bucket.s3.amazonaws.com/P1.jpg`
 
 ---
 
- Step 7 — Create the Database Table
+Step 7 — Create the Database Table
 
-In phpMyAdmin, run the following SQL to create the photos table:
+In phpMyAdmin, I ran the following SQL to create the photos table:
 
 ```sql
 CREATE TABLE photos (
@@ -203,7 +204,7 @@ CREATE TABLE photos (
 );
 ```
 
-Insert sample data:
+I then inserted sample data:
 
 ```sql
 INSERT INTO photos (photo_title, description, creation_date, keywords, s3_reference)
@@ -217,23 +218,55 @@ VALUES
 
 Step 8 — Configure the Application
 
-Edit the `constants.php` file in your application code to connect to RDS and S3:
+I edited the `constants.php` file in my application code to connect to RDS and S3:
 
 ```php
 <?php
-define('DB_HOST', 'your-rds-endpoint.rds.amazonaws.com');
-define('DB_USER', 'admin');
-define('DB_PASS', 'your-password');
+
+// [ACTION REQUIRED] your full name
+define('STUDENT_NAME', 'Anmol Srivastava');
+// [ACTION REQUIRED] your Student ID
+define('STUDENT_ID', '105026098');
+// [ACTION REQUIRED] your tutorial session
+define('TUTORIAL_SESSION', 'Tuesday 06:00PM');
+
+// [ACTION REQUIRED] name of the S3 bucket that stores images
+define('BUCKET_NAME', 'photoalbum-images-bucket');
+// [ACTION REQUIRED] region of the above bucket
+define('REGION', 'us-east-1');
+// no need to update this const
+define('S3_BASE_URL','https://'.BUCKET_NAME.'.s3.amazonaws.com/');
+
+// [ACTION REQUIRED] name of the database that stores photo meta-data (note that this is not the DB identifier of the RDS instance)
 define('DB_NAME', 'photo_album');
-define('S3_BUCKET_URL', 'https://photoalbum-images-bucket.s3.amazonaws.com/');
+// [ACTION REQUIRED] endpoint of RDS instance
+define('DB_ENDPOINT', 'photoalbum-db.ceqvjmn1uerm.us-east-1.rds.amazonaws.com');
+// [ACTION REQUIRED] username of your RDS instance 
+define('DB_USERNAME', 'admin');
+// [ACTION REQUIRED] password of your RDS instance
+define('DB_PWD', 'Swin2025!');
+
+// [ACTION REQUIRED] name of the DB table that stores photo's meta-data
+define('DB_PHOTO_TABLE_NAME', 'photos');
+// The table above has 5 columns:
+// [ACTION REQUIRED] name of the column in the above table that stores photo's titles
+define('DB_PHOTO_TITLE_COL_NAME', 'photo_title');
+// [ACTION REQUIRED] name of the column in the above table that stores photo's descriptions
+define('DB_PHOTO_DESCRIPTION_COL_NAME', 'description');
+// [ACTION REQUIRED] name of the column in the above table that stores photo's creation dates
+define('DB_PHOTO_CREATIONDATE_COL_NAME', 'creation_date');
+// [ACTION REQUIRED] name of the column in the above table that stores photo's keywords
+define('DB_PHOTO_KEYWORDS_COL_NAME', 'keywords');
+// [ACTION REQUIRED] name of the column in the above table that stores photo's links in S3 
+define('DB_PHOTO_S3REFERENCE_COL_NAME', 's3_reference');
 ?>
 ```
 
 ---
 
- Step 9 — Configure Network ACLs
+Step 9 — Configure Network ACLs
 
-A Network ACL (`PublicSubnet2NACL`) was added to Public Subnet 2 as an extra layer of security:
+I added a Network ACL (`PublicSubnet2NACL`) to Public Subnet 2 as an extra layer of security:
 
 | Rule  | Type | Protocol | Port | Source | Allow/Deny |
 |--------|------|----------|------|--------|------------|
@@ -243,32 +276,32 @@ A Network ACL (`PublicSubnet2NACL`) was added to Public Subnet 2 as an extra lay
 | 130 | HTTPS | TCP | 443 | 0.0.0.0/0 | Allow |
 | * | All traffic | All | All | 0.0.0.0/0 | Deny |
 
-> 💡 Unlike Security Groups (which remember connections), NACLs are stateless — you must explicitly allow both inbound AND outbound traffic for every rule.
+> Unlike Security Groups (which remember connections), NACLs are stateless — I had to explicitly allow both inbound AND outbound traffic for every rule.
 
 ---
 
 Accessing the Application
 
-Once everything is set up, open a browser and go to:
+Once I had everything set up, I opened a browser and navigated to:
 
 ```
 http://18.233.133.57/cos80001/photoalbum/album.php
 ```
 
-You should see the photo album with images loaded from S3 and details pulled from the RDS database.
+I could see the photo album with images loaded from S3 and details pulled from the RDS database.
 
 ---
 
 Security Design Summary
 
-This project follows a defence-in-depth approach — multiple layers of security:
+I followed a defence-in-depth approach — multiple layers of security:
 
-1. VPC Isolation — all resources live inside a private network, not exposed directly to the internet
-2. Public vs Private Subnets — web server is public-facing; database is locked in a private subnet
-3. Security Groups — instance-level rules; RDS only accepts connections from the web server
-4. Network ACLs — subnet-level rules for an extra firewall layer
-5. No Public RDS Access — database has no public IP at all
-6. S3 Bucket Policy — only read access is granted publicly; no one can delete or modify files
+1. VPC Isolation — I kept all resources inside a private network, not exposed directly to the internet
+2. Public vs Private Subnets — I made the web server public-facing and locked the database in a private subnet
+3. Security Groups — I configured instance-level rules so RDS only accepts connections from the web server
+4. Network ACLs — I added subnet-level rules for an extra firewall layer
+5. No Public RDS Access — I ensured the database has no public IP at all
+6. S3 Bucket Policy — I granted only read access publicly so no one can delete or modify files
 
 ---
 
@@ -300,4 +333,3 @@ Tech Stack
 - DB Management UI: phpMyAdmin
 - OS: Amazon Linux 2023
 - Instance Type: t2.micro (Free Tier)
-
